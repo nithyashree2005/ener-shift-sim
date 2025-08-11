@@ -5,9 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Sun, Wind, Battery, Zap, TrendingUp, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { MapPin, Sun, Wind, Battery, Zap, TrendingUp, AlertTriangle, CheckCircle, XCircle, 
+         Calculator, Leaf, Clock, Bell, BarChart3, Download, Settings, DollarSign, 
+         CloudRain, Thermometer, Eye } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+         AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import EnhancedFeatures from '@/components/EnhancedFeatures';
 
 interface LocationData {
   latitude: number;
@@ -39,6 +44,36 @@ interface BatteryState {
   runtime: number;
 }
 
+interface EnergyConsumption {
+  dailyDemand: number;
+  peakHours: string;
+  appliances: Array<{ name: string; power: number; hours: number }>;
+}
+
+interface CostAnalysis {
+  gridCost: number;
+  renewableSavings: number;
+  paybackPeriod: number;
+  annualSavings: number;
+}
+
+interface WeatherData {
+  temperature: number;
+  humidity: number;
+  clouds: number;
+  condition: string;
+}
+
+interface EnhancedRecommendation {
+  type: 'solar' | 'wind' | 'battery' | 'grid' | 'economic' | 'environmental';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  message: string;
+  action: string;
+  timeframe: string;
+  impact: number;
+  confidence: number;
+}
+
 interface Recommendation {
   type: 'solar' | 'wind' | 'battery' | 'grid';
   priority: 'high' | 'medium' | 'low';
@@ -53,6 +88,13 @@ interface FeasibilityResult {
   icon: typeof CheckCircle | typeof AlertTriangle | typeof XCircle;
 }
 
+interface CarbonFootprint {
+  currentEmissions: number;
+  renewableReduction: number;
+  annualSavings: number;
+  treesEquivalent: number;
+}
+
 const EnerShiftDashboard = () => {
   const { toast } = useToast();
   const [location, setLocation] = useState<LocationData | null>(null);
@@ -63,10 +105,38 @@ const EnerShiftDashboard = () => {
     percentage: 75,
     runtime: 0
   });
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<EnhancedRecommendation[]>([]);
   const [feasibility, setFeasibility] = useState<FeasibilityResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [manualLocation, setManualLocation] = useState({ lat: '', lon: '' });
+  
+  // Enhanced state
+  const [energyConsumption, setEnergyConsumption] = useState<EnergyConsumption>({
+    dailyDemand: 25,
+    peakHours: '18:00-22:00',
+    appliances: [
+      { name: 'LED Lights', power: 0.5, hours: 8 },
+      { name: 'Refrigerator', power: 1.2, hours: 24 },
+      { name: 'Mobile Charging', power: 0.1, hours: 4 }
+    ]
+  });
+  
+  const [costAnalysis, setCostAnalysis] = useState<CostAnalysis>({
+    gridCost: 8.5,
+    renewableSavings: 0,
+    paybackPeriod: 0,
+    annualSavings: 0
+  });
+  
+  const [carbonFootprint, setCarbonFootprint] = useState<CarbonFootprint>({
+    currentEmissions: 0,
+    renewableReduction: 0,
+    annualSavings: 0,
+    treesEquivalent: 0
+  });
+  
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Auto-detect location on mount
   useEffect(() => {
@@ -267,46 +337,88 @@ const EnerShiftDashboard = () => {
   const generateRecommendations = () => {
     if (!energyData) return;
 
-    const recs: Recommendation[] = [];
+    const recs: EnhancedRecommendation[] = [];
     const { solar, wind } = energyData;
+    const currentHour = new Date().getHours();
+    const isDaytime = currentHour >= 6 && currentHour <= 18;
 
-    // Solar recommendations
+    // Enhanced Solar recommendations with AI logic
     if (solar.current > 5 && battery.percentage < 50) {
       recs.push({
         type: 'solar',
-        priority: 'high',
+        priority: 'critical',
         message: 'Excellent solar conditions detected',
-        action: 'Charge battery during peak sunlight hours'
+        action: 'Maximize solar charging immediately',
+        timeframe: isDaytime ? 'Next 2-4 hours' : 'Tomorrow 10AM-2PM',
+        impact: 85,
+        confidence: 92
       });
     }
 
-    // Wind recommendations  
+    // Wind optimization recommendations
     if (wind.current > 5 && battery.percentage < 70) {
       recs.push({
         type: 'wind',
         priority: 'high',
         message: 'Strong wind speeds available',
-        action: 'Activate wind turbine charging'
+        action: 'Activate wind turbine charging',
+        timeframe: 'Next 6 hours',
+        impact: 70,
+        confidence: 88
       });
     }
 
-    // Battery recommendations
+    // Economic optimization
+    if (solar.average > 4 && wind.average > 3) {
+      const savings = (solar.average + wind.average) * costAnalysis.gridCost * 0.8;
+      recs.push({
+        type: 'economic',
+        priority: 'medium',
+        message: `Potential daily savings: ₹${savings.toFixed(0)}`,
+        action: 'Optimize renewable mix for maximum ROI',
+        timeframe: 'Daily optimization',
+        impact: 60,
+        confidence: 85
+      });
+    }
+
+    // Environmental recommendations
+    const carbonReduction = (energyConsumption.dailyDemand * 0.82) / 1000; // kg CO2
+    if (carbonReduction > 0.5) {
+      recs.push({
+        type: 'environmental',
+        priority: 'medium',
+        message: `Reduce ${carbonReduction.toFixed(1)}kg CO2 daily`,
+        action: 'Switch to 100% renewable energy',
+        timeframe: 'Continuous',
+        impact: 90,
+        confidence: 95
+      });
+    }
+
+    // Critical battery warnings
     if (battery.percentage < 20) {
       recs.push({
         type: 'battery',
-        priority: 'high',
-        message: 'Critical battery level',
-        action: 'Switch to grid backup immediately'
+        priority: 'critical',
+        message: 'Critical battery level detected',
+        action: 'Switch to grid backup immediately',
+        timeframe: 'Immediate',
+        impact: 100,
+        confidence: 100
       });
     }
 
-    // Low renewable conditions
+    // Weather-based recommendations
     if (solar.current < 3 && wind.current < 3) {
       recs.push({
         type: 'grid',
-        priority: 'medium',
-        message: 'Low renewable energy availability',
-        action: 'Reduce consumption or use grid backup'
+        priority: 'high',
+        message: 'Low renewable availability',
+        action: 'Use grid power during off-peak hours',
+        timeframe: 'Next 12 hours',
+        impact: 45,
+        confidence: 80
       });
     }
 
@@ -411,9 +523,19 @@ const EnerShiftDashboard = () => {
             EnerShift
           </h1>
           <p className="text-xl text-muted-foreground">Smart Rural Energy Simulator</p>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Zap className="w-4 h-4" />
-            <span>Data provided by NASA POWER API via satellite measurement</span>
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              <span>NASA POWER API</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              <span>AI-Powered Analytics</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Battery className="w-4 h-4" />
+              <span>Real-time Optimization</span>
+            </div>
           </div>
         </div>
 
@@ -459,6 +581,14 @@ const EnerShiftDashboard = () => {
           </div>
         </Card>
 
+        {/* Main Dashboard Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Dashboard Overview</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced Features</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
         {energyData && (
           <>
             {/* Energy Data Cards */}
@@ -699,6 +829,16 @@ const EnerShiftDashboard = () => {
             )}
           </>
         )}
+          </TabsContent>
+
+          <TabsContent value="advanced" className="space-y-6">
+            <EnhancedFeatures 
+              energyData={energyData} 
+              battery={battery} 
+              location={location} 
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground py-4">
