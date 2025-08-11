@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Energy-specific colors
+				energy: {
+					solar: 'hsl(var(--solar))',
+					wind: 'hsl(var(--wind))',
+					battery: 'hsl(var(--battery))',
+					grid: 'hsl(var(--grid))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
