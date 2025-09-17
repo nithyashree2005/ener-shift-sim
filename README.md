@@ -36,4 +36,42 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+#Features
 
+📍 Smart Location Detection – Adjusts simulation using your current location
+
+☀️ NASA Real-Time Data – Fetches solar radiation & temperature from NASA POWER API
+
+🔋 AI Battery Management – Intelligent charge/discharge with load prioritization
+
+📊 Interactive Dashboard – Graphs for solar, wind, demand, and battery status
+
+🧠 Smart Recommendations – Actionable tips for energy saving & optimization
+
+
+#🔎 How It Works
+
+Detect Location – The app automatically detects your location (latitude & longitude).
+
+Fetch NASA POWER Data – Using your coordinates, EnerShift connects to the NASA POWER API
+ to fetch:
+
+☀️ Solar radiation (ALLSKY_SFC_SW_DWN)
+
+🌡 Temperature (T2M)
+
+Other renewable energy parameters
+
+Simulate Renewable Generation – NASA’s real-time data is used to calculate solar & wind energy availability.
+
+AI-Based Battery Management – The system decides whether to:
+
+Charge the battery
+
+Discharge to meet demand
+
+Share excess power with the grid/village
+
+Enter critical load mode when energy is very low
+
+Visualize & Recommend – Results are shown in interactive charts with AI-powered suggestions.
